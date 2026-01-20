@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EscapeBook - Salles</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 24px;
+      }
+      .card {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      .title {
+        margin: 0 0 6px 0;
+      }
+      .muted {
+        color: #666;
+        font-size: 14px;
+      }
+      .error {
+        color: #b00020;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>EscapeBook</h1>
+    <p class="muted">Liste des salles disponibles</p>
+
+    <div id="status" class="muted">Chargement...</div>
+    <div id="rooms"></div>
+
+    <script>
+      const API_BASE = "http://localhost:3000/api";
+
+      async function loadRooms() {
+        const statusEl = document.getElementById("status");
+        const roomsEl = document.getElementById("rooms");
+
+        try {
+          const res = await fetch(`${API_BASE}/rooms`);
+          if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+          const rooms = await res.json();
+
+          statusEl.textContent = `${rooms.length} salle(s) trouvée(s).`;
+
+          roomsEl.innerHTML = rooms
+            .map(
+              (room) => `
+            <div class="card">
+              <h2 class="title">${room.name}</h2>
+              <div class="muted">${room.duration_minutes} min • ${room.min_players}-${room.max_players} joueurs • ${room.price} €</div>
+              <p>${room.description}</p>
+            </div>
+          `
+            )
+            .join("");
+        } catch (err) {
+          statusEl.innerHTML = `<span class="error">Erreur: impossible de charger les salles (${err.message}).</span>`;
+        }
+      }
+
+      loadRooms();
+    </script>
+  </body>
+</html>
